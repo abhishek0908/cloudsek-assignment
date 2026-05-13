@@ -1,0 +1,13 @@
+# Web framework & server
+fastapi==0.115.6
+uvicorn[standard]==0.34.0
+
+# Validation & config
+pydantic==2.10.4
+pydantic-settings==2.7.0
+
+# MongoDB (async)
+motor==3.6.0
+
+# Logging
+structlog==24.4.0
