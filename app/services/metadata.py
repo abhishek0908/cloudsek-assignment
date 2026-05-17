@@ -53,7 +53,6 @@ class MetadataService:
         await self._trigger(url)
 
         return AcceptedResponse(
-            message="Metadata not found, fetch has been scheduled",
             url=url,
             status=FetchStatus.PENDING,
         )
@@ -66,7 +65,7 @@ class MetadataService:
 
         except Exception as e:
             await self.repository.update_error(url, str(e))
-            logger.exception("Fetch failed for %s: %s", url, e)
+            logger.exception(f"Fetch failed for {url}: {e}")
             raise
 
     async def _trigger(self, url: str) -> None:

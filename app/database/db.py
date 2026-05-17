@@ -29,7 +29,7 @@ async def connect_db(mongo_url: str) -> None:
         logger.info("Connected to MongoDB")
 
     except PyMongoError as e:
-        logger.exception("MongoDB connection failed", url=mongo_url, error=str(e))
+        logger.exception(f"MongoDB connection failed url={mongo_url} error={e}")
         raise
 
 

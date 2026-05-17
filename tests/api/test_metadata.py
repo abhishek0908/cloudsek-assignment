@@ -29,7 +29,7 @@ def test_create_metadata(test_client, mock_service):
     mock_service.create_metadata.return_value = mock_response_data
 
     payload = {"url": "https://example.com"}
-    response = test_client.post("/metadata/", json=payload)
+    response = test_client.post("/api/v1/metadata/", json=payload)
 
     assert response.status_code == 201
     data = response.json()
@@ -57,7 +57,7 @@ def test_get_metadata_done(test_client, mock_service):
     mock_service.get_metadata.return_value = mock_response_data
 
     response = test_client.get(
-        "/metadata/",
+        "/api/v1/metadata/",
         params={"url": "https://example.com"},
     )
 
@@ -75,13 +75,12 @@ def test_get_metadata_pending(test_client, mock_service):
     from app.schemas.metadata import AcceptedResponse
 
     mock_service.get_metadata.return_value = AcceptedResponse(
-        message="Metadata not found, fetch has been scheduled",
         url="https://example.com/",
         status=FetchStatus.PENDING,
     )
 
     response = test_client.get(
-        "/metadata/",
+        "/api/v1/metadata/",
         params={"url": "https://example.com"},
     )
 
@@ -96,7 +95,7 @@ def test_get_metadata_pending(test_client, mock_service):
 
 def test_create_metadata_malformed(test_client):
     payload = {"url": "not-a-valid-url"}
-    response = test_client.post("/metadata/", json=payload)
+    response = test_client.post("/api/v1/metadata/", json=payload)
 
     assert response.status_code == 422
     data = response.json()

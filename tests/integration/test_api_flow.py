@@ -48,7 +48,7 @@ class TestPostAndGetFlow:
         try:
             # POST
             post_resp = test_client.post(
-                "/metadata/",
+                "/api/v1/metadata/",
                 json={"url": "https://example.com"},
             )
             assert post_resp.status_code == 201
@@ -58,7 +58,7 @@ class TestPostAndGetFlow:
 
             # GET
             get_resp = test_client.get(
-                "/metadata/",
+                "/api/v1/metadata/",
                 params={"url": "https://example.com"},
             )
             assert get_resp.status_code == 200
@@ -79,7 +79,6 @@ class TestPostAndGetFlow:
 
         mock_service = AsyncMock()
         mock_service.get_metadata.return_value = AcceptedResponse(
-            message="Metadata not found, fetch has been scheduled",
             url="https://unknown.com/",
             status=FetchStatus.PENDING,
         )
@@ -89,7 +88,7 @@ class TestPostAndGetFlow:
 
         try:
             resp = test_client.get(
-                "/metadata/",
+                "/api/v1/metadata/",
                 params={"url": "https://unknown.com"},
             )
             assert resp.status_code == 202
@@ -102,7 +101,7 @@ class TestPostAndGetFlow:
 
     def test_create_malformed_url_422(self, test_client):
         resp = test_client.post(
-            "/metadata/",
+            "/api/v1/metadata/",
             json={"url": "not-a-valid-url"},
         )
         assert resp.status_code == 422
@@ -112,7 +111,7 @@ class TestPostAndGetFlow:
 
     def test_get_malformed_url_422(self, test_client):
         resp = test_client.get(
-            "/metadata/",
+            "/api/v1/metadata/",
             params={"url": "not-valid"},
         )
         assert resp.status_code == 422
@@ -144,7 +143,7 @@ class TestPostAndGetFlow:
         try:
             for _ in range(2):
                 resp = test_client.post(
-                    "/metadata/",
+                    "/api/v1/metadata/",
                     json={"url": "https://example.com"},
                 )
                 assert resp.status_code == 201

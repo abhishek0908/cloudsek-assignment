@@ -48,7 +48,7 @@ class FetcherService:
 
         except httpx.TimeoutException:
 
-            logger.exception("Request timeout", url=url)
+            logger.exception(f"Request timeout url={url}")
 
             raise AppError(
                 message="Request timed out",
@@ -59,9 +59,7 @@ class FetcherService:
         except httpx.HTTPStatusError as e:
 
             logger.exception(
-                "HTTP error response",
-                url=url,
-                status_code=e.response.status_code,
+                f"HTTP error response url={url} status_code={e.response.status_code}",
             )
 
             raise AppError(
@@ -72,7 +70,7 @@ class FetcherService:
 
         except httpx.ConnectError:
 
-            logger.exception("Connection failed", url=url)
+            logger.exception(f"Connection failed url={url}")
 
             raise AppError(
                 message="Failed to connect",
@@ -82,7 +80,7 @@ class FetcherService:
 
         except httpx.RequestError:
 
-            logger.exception("Request failed", url=url)
+            logger.exception(f"Request failed url={url}")
 
             raise AppError(
                 message="External request failed",

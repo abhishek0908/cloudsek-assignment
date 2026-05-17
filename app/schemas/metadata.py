@@ -21,7 +21,6 @@ class MetadataResponse(BaseModel):
 
 
 class AcceptedResponse(BaseModel):
-    message: str
     url: str
     status: FetchStatus = FetchStatus.PENDING
 

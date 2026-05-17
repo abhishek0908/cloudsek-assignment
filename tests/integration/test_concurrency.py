@@ -19,8 +19,7 @@ class TestConcurrentCreateMetadata:
         metadata_service: MetadataService,
         mocked_fetcher,
     ):
-        url = "https://example.com"
-
+        url = "https://example.com/"
         # Ensure the HTTP client returns valid data for all calls
         async def fake_fetch(_url):
             return FetchedMetadata(
@@ -106,6 +105,7 @@ class TestConcurrentGetMetadata:
         repository,
     ):
         url = "https://background-dedup.com"
+        normalized_url = "https://background-dedup.com/"
         fetch_count = 0
 
         async def counting_fetch(_url):
@@ -142,7 +142,7 @@ class TestConcurrentGetMetadata:
         assert fetch_count == 1
 
         # Document should now be DONE
-        doc = await repository.get_by_url(url)
+        doc = await repository.get_by_url(normalized_url)
         assert doc is not None
         assert doc.status == FetchStatus.DONE
 

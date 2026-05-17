@@ -70,8 +70,7 @@ class BackgroundWorker:
 
                 if completed_task.cancelled():
                     done_callback_logger.warning(
-                        "Task cancelled for key=%s",
-                        key,
+                        f"Task cancelled for key={key}",
                     )
                     return
 
@@ -79,16 +78,12 @@ class BackgroundWorker:
 
                 if exc:
                     done_callback_logger.exception(
-                        "Task failed for key=%s: %s",
-                        key,
-                        exc,
+                        f"Task failed for key={key}: {exc}",
                     )
 
             except Exception:
                 done_callback_logger.exception(
-                    "Error while handling task cleanup "
-                    "for key=%s",
-                    key,
+                    f"Error while handling task cleanup for key={key}",
                 )
 
         task.add_done_callback(_on_done)
