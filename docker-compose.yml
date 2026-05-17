@@ -6,6 +6,14 @@ services:
     container_name: metadata_api
     ports:
       - "8000:8000"
+    environment:
+      MONGODB_URL: mongodb://mongo:27017
+      DATABASE_NAME: metadata_inventory
+      REQUEST_TIMEOUT: "10"
+      APP_NAME: HTTP Metadata Inventory
+      APP_VERSION: 1.0.0
+      ENVIRONMENT: development
+      LOG_LEVEL: INFO
     env_file:
       - .env
     depends_on:

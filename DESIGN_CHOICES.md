@@ -181,3 +181,11 @@ The integration tests are the most interesting part. I specifically wrote tests 
 - **Dependency injection via FastAPI `Depends`** — all collaborators (repository, fetcher, worker) are wired once in `dependencies.py` and injected into services. Routes stay thin, services stay testable, and swapping a dependency means changing one place.
 
 - **12-factor config** (`app/core/config.py`) — all settings from environment variables via `pydantic-settings`. Automatic type coercion (string `"10"` → int `10`), validation at startup, identical behaviour across dev, staging, and production.
+
+
+
+## Known limitations
+ 
+**Redirect URL storage** — currently the record is stored against the URL the user originally gave us, not the final URL after redirects. So if someone requests `https://amazon.com` and it redirects to `https://www.amazon.com`, the DB record is stored under `https://amazon.com`. URL normalisation handles the `www.` case, but a redirect to a completely different destination (e.g. a URL shortener resolving to a third-party domain) would still be stored under the original. The right fix would be to store the final resolved URL from `response.url` after following redirects, and update the record key accordingly.
+ 
+**Single process only** — the background worker's task deduplication relies on an in-memory dict inside a single process. This works fine for one instance, but if you scale horizontally behind a load balancer, each instance has its own isolated task map. Two instances could both pick up the same uncached URL and fetch it in parallel with no awareness of each other. At that point you'd need a shared coordination layer — Redis with a TTL key per in-flight URL, or a proper task queue like Celery. For this scope it's not a concern, but worth knowing before scaling out.
