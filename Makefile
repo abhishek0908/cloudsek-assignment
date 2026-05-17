@@ -5,7 +5,7 @@ PYTHON = $(VENV)/python
 PIP = $(VENV)/pip
 
 install:
-	$(PIP) install -r requirements.txt
+	$(PIP) install -r requirements.txt -r requirements-dev.txt
 
 test: test-unit test-integration
 

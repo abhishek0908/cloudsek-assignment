@@ -5,33 +5,16 @@
 [![MongoDB](https://img.shields.io/badge/MongoDB-7.0-brightgreen)]()
 [![docker](https://img.shields.io/badge/docker-compose-blue)]()
 
-An asynchronous REST API that extracts, caches, and serves website metadata (headers, cookies, page source) from user-supplied URLs. Built with **FastAPI**, **MongoDB**, and pure **asyncio** — no external message brokers.
+An asynchronous REST API that extracts, caches, and serves website metadata (headers, cookies, page source) from user-supplied URLs. Built with **FastAPI**, **MongoDB**, and pure **asyncio**.
 
 ---
 
 ## Quick Start
 
 ```bash
-docker compose up -d --build
-# POST — fetch and store metadata
-curl -X POST http://localhost:8000/api/v1/metadata/ \
-  -H 'Content-Type: application/json' \
-  -d '{"url": "https://example.com"}'
-# GET — poll cached metadata
-curl "http://localhost:8000/api/v1/metadata/?url=https://example.com"
-```
-
-Interactive docs at [http://localhost:8000/docs](http://localhost:8000/docs).
-
----
-
-## Setup
-
-### Docker (Recommended)
-
-Spins up both the API and MongoDB in containers. No setup needed.
-
-```bash
+git clone https://github.com/abhishek0908/cloudsek-assignment.git
+cd cloudsek-assignment
+cp .env.example .env
 docker compose up -d --build
 ```
 
