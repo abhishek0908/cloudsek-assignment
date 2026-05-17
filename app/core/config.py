@@ -8,6 +8,7 @@ class Settings(BaseSettings):
     app_version: str
     environment: str
     log_level: str
+    request_timeout: int = 10
     model_config = SettingsConfigDict(
         env_file=".env",
         extra="ignore"

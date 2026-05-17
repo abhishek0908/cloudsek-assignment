@@ -16,7 +16,7 @@ def _add_service_info(_: Any, __: Any, event_dict: EventDict) -> EventDict:
 def configure_logging() -> None:
     level = getattr(logging, settings.log_level.upper(), logging.INFO)
     is_dev = settings.environment == "development"
-
+    
     shared_processors = [
         structlog.contextvars.merge_contextvars,       # request-scoped fields (request_id, url)
         structlog.processors.add_log_level,

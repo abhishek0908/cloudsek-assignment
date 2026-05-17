@@ -21,10 +21,15 @@ async def connect_db(mongo_url: str) -> None:
 
         await client.admin.command("ping")
 
+        # Beanie 2.1.0 internally calls client.append_metadata();
+        # Motor 3.7+ __getattr__ intercepts unknown attrs, so we
+        # stub it directly on the instance to bypass the fallback.
+        client.append_metadata = lambda _: None
+
         logger.info("Connected to MongoDB")
 
     except PyMongoError as e:
-        logger.exception(f"MongoDB connection failed: {e}")
+        logger.exception("MongoDB connection failed", url=mongo_url, error=str(e))
         raise
 
 
@@ -36,15 +41,3 @@ async def close_db() -> None:
         client = None
         logger.info("MongoDB connection closed")
 
-
-def get_collection(
-    db_name: str,
-    collection_name: str,
-) -> AsyncIOMotorCollection:
-
-    if client is None:
-        raise RuntimeError(
-            "Database not connected. Call connect_db() first."
-        )
-
-    return client[db_name][collection_name]
