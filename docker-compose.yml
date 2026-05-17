@@ -14,8 +14,6 @@ services:
       APP_VERSION: 1.0.0
       ENVIRONMENT: development
       LOG_LEVEL: INFO
-    env_file:
-      - .env
     depends_on:
       mongo:
         condition: service_healthy
