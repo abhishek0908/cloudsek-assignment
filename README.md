@@ -23,20 +23,24 @@ To stop: `docker compose down`
 
 ### Local Python Environment
 
-**Prerequisites**: Python 3.11+, a running MongoDB instance.
+**Prerequisites**: Python 3.11 or 3.12 (recommended), a running MongoDB instance.
 
 ```bash
 cp .env.example .env
 python3 -m venv venv
-source venv/bin/activate
-pip install -r requirements.txt
+source venv/bin/activate   # activate the virtual environment first
+make install                # then install dependencies (uses venv pip)
 uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
 ```
 
 ### Running Tests
 
+Make sure create venv and before running make command 
+
 ```bash
+
 pytest                  # all tests
+make install
 make test               # all tests
 make test-unit          # unit tests only
 make test-integration   # integration tests (requires Docker for MongoDB)
