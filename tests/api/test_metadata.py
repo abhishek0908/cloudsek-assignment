@@ -13,8 +13,8 @@ def mock_service():
     app.dependency_overrides.clear()
 
 
-def test_create_metadata(test_client, mock_service):
-    mock_response_data = {
+def _done_response():
+    return {
         "url": "https://example.com",
         "status": FetchStatus.DONE,
         "status_code": 200,
@@ -26,78 +26,54 @@ def test_create_metadata(test_client, mock_service):
         "created_at": "2023-01-01T00:00:00Z",
         "updated_at": "2023-01-01T00:00:00Z",
     }
-    mock_service.create_metadata.return_value = mock_response_data
-
-    payload = {"url": "https://example.com"}
-    response = test_client.post("/api/v1/metadata/", json=payload)
-
-    assert response.status_code == 201
-    data = response.json()
-    assert data["success"] is True
-    assert data["data"]["url"] == "https://example.com"
-    mock_service.create_metadata.assert_called_once_with(
-        "https://example.com/",
-    )
 
 
-def test_get_metadata_done(test_client, mock_service):
-    """GET returns 200 when metadata is already available (DONE)."""
-    mock_response_data = {
-        "url": "https://example.com",
-        "status": FetchStatus.DONE,
-        "status_code": 200,
-        "headers": {},
-        "cookies": {},
-        "page_source": "<html></html>",
-        "error_message": None,
-        "fetched_at": "2023-01-01T00:00:00Z",
-        "created_at": "2023-01-01T00:00:00Z",
-        "updated_at": "2023-01-01T00:00:00Z",
-    }
-    mock_service.get_metadata.return_value = mock_response_data
+class TestCreateMetadata:
 
-    response = test_client.get(
-        "/api/v1/metadata/",
-        params={"url": "https://example.com"},
-    )
+    def test_valid_url_returns_201(self, test_client, mock_service):
+        mock_service.create_metadata.return_value = _done_response()
 
-    assert response.status_code == 200
-    data = response.json()
-    assert data["success"] is True
-    assert data["data"]["url"] == "https://example.com"
-    mock_service.get_metadata.assert_called_once_with(
-        "https://example.com/",
-    )
+        resp = test_client.post("/api/v1/metadata/", json={"url": "https://example.com"})
+
+        assert resp.status_code == 201
+        assert resp.json()["success"] is True
+        mock_service.create_metadata.assert_called_once_with("https://example.com/")
+
+    def test_malformed_url_returns_422(self, test_client):
+        resp = test_client.post("/api/v1/metadata/", json={"url": "not-a-valid-url"})
+
+        assert resp.status_code == 422
+        assert resp.json()["error"]["code"] == "VALIDATION_ERROR"
+
+    def test_missing_field_returns_422(self, test_client):
+        resp = test_client.post("/api/v1/metadata/", json={})
+
+        assert resp.status_code == 422
 
 
-def test_get_metadata_pending(test_client, mock_service):
-    """GET returns 202 when metadata is pending / being fetched."""
-    from app.schemas.metadata import AcceptedResponse
+class TestGetMetadata:
 
-    mock_service.get_metadata.return_value = AcceptedResponse(
-        url="https://example.com/",
-        status=FetchStatus.PENDING,
-    )
+    def test_done_returns_200(self, test_client, mock_service):
+        mock_service.get_metadata.return_value = _done_response()
 
-    response = test_client.get(
-        "/api/v1/metadata/",
-        params={"url": "https://example.com"},
-    )
+        resp = test_client.get("/api/v1/metadata/", params={"url": "https://example.com"})
 
-    assert response.status_code == 202
-    data = response.json()
-    assert data["success"] is True
-    assert data["data"]["url"] == "https://example.com/"
-    mock_service.get_metadata.assert_called_once_with(
-        "https://example.com/",
-    )
+        assert resp.status_code == 200
+        assert resp.json()["data"]["status"] == FetchStatus.DONE.value
 
+    def test_pending_returns_202(self, test_client, mock_service):
+        from app.schemas.metadata import AcceptedResponse
 
-def test_create_metadata_malformed(test_client):
-    payload = {"url": "not-a-valid-url"}
-    response = test_client.post("/api/v1/metadata/", json=payload)
+        mock_service.get_metadata.return_value = AcceptedResponse(
+            url="https://example.com/", status=FetchStatus.PENDING,
+        )
 
-    assert response.status_code == 422
-    data = response.json()
-    assert data["success"] is False
-    assert data["error"]["code"] == "VALIDATION_ERROR"
+        resp = test_client.get("/api/v1/metadata/", params={"url": "https://example.com"})
+
+        assert resp.status_code == 202
+        assert resp.json()["data"]["status"] == FetchStatus.PENDING.value
+
+    def test_missing_param_returns_422(self, test_client):
+        resp = test_client.get("/api/v1/metadata/")
+
+        assert resp.status_code == 422

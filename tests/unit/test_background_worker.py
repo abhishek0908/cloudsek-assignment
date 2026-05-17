@@ -153,3 +153,24 @@ async def test_factory_not_called_when_task_exists():
 
     can_finish.set()
     await task_a
+
+
+@pytest.mark.asyncio
+async def test_schedule_once_cancelled_task_cleans_up():
+    worker = BackgroundWorker(limit=5)
+    started = asyncio.Event()
+    can_finish = asyncio.Event()
+
+    async def work():
+        started.set()
+        await can_finish.wait()
+
+    task = await worker.schedule_once("cancel-key", lambda: work())
+    await started.wait()
+
+    task.cancel()
+    with pytest.raises(asyncio.CancelledError):
+        await task
+
+    await asyncio.sleep(0)
+    assert "cancel-key" not in worker._tasks_by_key

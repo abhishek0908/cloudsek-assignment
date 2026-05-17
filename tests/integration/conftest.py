@@ -1,6 +1,6 @@
 import pytest
 import pytest_asyncio
-from unittest.mock import AsyncMock
+from unittest.mock import AsyncMock, patch
 
 from testcontainers.mongodb import MongoDbContainer
 from motor.motor_asyncio import AsyncIOMotorClient
@@ -75,16 +75,26 @@ def background_worker():
 
 @pytest_asyncio.fixture
 async def mocked_fetcher():
+    import httpx
     svc = FetcherService()
     await svc.client.aclose()
-    svc.client = AsyncMock()
-    svc.client.get.return_value = AsyncMock(
-        status_code=200,
-        headers={"content-type": "text/html"},
-        cookies={},
-        text="<html>ok</html>",
-    )
-    return svc
+    mock_client = AsyncMock()
+    mock_client.timeout = httpx.Timeout(5.0)
+
+    async def fake_get(url, **kwargs):
+        req = httpx.Request("GET", str(url))
+        return httpx.Response(
+            status_code=200,
+            headers={"content-type": "text/html"},
+            text="<html>ok</html>",
+            request=req,
+        )
+
+    mock_client.get.side_effect = fake_get
+    svc.client = mock_client
+
+    with patch("app.services.fetcher.validate_ssrf", return_value=None):
+        yield svc
 
 
 @pytest_asyncio.fixture
